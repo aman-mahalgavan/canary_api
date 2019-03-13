@@ -19,6 +19,10 @@ let userSchema = new mongoose.Schema({
   Date: {
     type: Date,
     default: Date.now
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
   }
 });
 

@@ -1,2 +1,3 @@
 node_modules/
-configure/keys/
+keys.js
+/credentials.js

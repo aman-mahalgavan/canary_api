@@ -1,8 +1,10 @@
 // requiring node modules
 const express = require("express");
 const User = require("../../Models/User");
+const Token = require("../../Models/Token");
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
+const crypto = require("crypto");
 
 // Creating a Router object
 const router = express.Router();
@@ -31,6 +33,13 @@ router.post("/register", async (req, res) => {
       let hashedUser = await newUser.hashPassword();
       let savedUser = await hashedUser.save();
 
+      let token = new Token({
+        userId: savedUser._id,
+        token: crypto.randomBytes(16).toString("hex")
+      });
+
+      let savedToken = await token.save();
+
       return res.json({
         email: savedUser.email,
         name: savedUser.name
@@ -55,8 +64,12 @@ router.post("/login", async (req, res) => {
     if (user) {
       let isMatch = bcrypt.compare(password, user.password);
       if (isMatch) {
+        if (!user.isVerified) {
+          errors.verified = `Your email ${user.email} is not yet verified`;
+          return res.status(401).send({ errors });
+        }
         let token = await user.createJWT();
-        res.json({
+        return res.json({
           msg: "success",
           token: `Bearer ${token}`
         });
@@ -73,5 +86,9 @@ router.post("/login", async (req, res) => {
     return res.status(400).json({ errors });
   }
 });
+
+// @route     GET /api/auth/confirmation/:token
+// @fnc       confirming a user
+// @access    Public
 
 module.exports = router;
