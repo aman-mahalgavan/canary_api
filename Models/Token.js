@@ -16,3 +16,7 @@ let tokenSchema = new mongoose.Schema({
     expires: 43200
   }
 });
+
+let Token = mongoose.model("tokens", tokenSchema);
+
+module.exports = Token;

@@ -1,13 +1,48 @@
-// using SendGrid's v3 Node.js Library
-// https://github.com/sendgrid/sendgrid-nodejs
-const api_key = require("./credentials").sendGridApiKey;
-const sgMail = require("@sendgrid/mail");
-sgMail.setApiKey(api_key);
-const msg = {
-  to: "test@example.com",
-  from: "test@example.com",
-  subject: "Sending with SendGrid is Fun",
-  text: "and easy to do anywhere, even with Node.js",
-  html: "<strong>and easy to do anywhere, even with Node.js</strong>"
+const nodemailer = require("nodemailer");
+const keys = require("../credentials");
+
+module.exports = async (token, host, receiver, usage) => {
+  // create reusable transporter object using the default SMTP transport
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      type: "OAuth2",
+      user: keys.user,
+      clientId: keys.googleClientId,
+      clientSecret: keys.googleClientSecret,
+      refreshToken: keys.refreshToken,
+      accessToken: keys.accessToken
+    },
+    tls: { rejectUnauthorized: false }
+  });
+
+  let output = ``;
+  if (usage == "verify") {
+    output = `
+    <h2>Please click on the button below to confirm your email</h2>
+     
+       <a href="http://${host}/api/auth/confirmation/${token}">Confirm</a>
+      `;
+  } else {
+    output = `
+    <h2>Please click on the button below to reset your password</h2>
+     
+       <a href="http://${host}/reset/${token}">Reset password</a>
+      `;
+  }
+
+  // setup email data with unicode symbols
+  let mailOptions = {
+    from: "Node Contact<ukogdna6560@gmail.com>", // sender address
+    to: receiver, // list of receivers
+    subject: "Email confirmation", // Subject line
+    text: "Hello world?", // plain text body
+    html: output // html body
+  };
+  // send mail with defined transport object
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return console.log(error);
+    }
+  });
 };
-sgMail.send(msg);
