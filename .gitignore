@@ -1,3 +1,4 @@
 node_modules/
 keys.js
 /credentials.js
+/canary.json
