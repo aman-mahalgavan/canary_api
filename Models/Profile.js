@@ -14,7 +14,7 @@ let profileSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  Bio: {
+  bio: {
     type: String
   },
   social: {
@@ -22,6 +22,12 @@ let profileSchema = new mongoose.Schema({
       type: String
     },
     instagram: {
+      type: String
+    },
+    twitter: {
+      type: String
+    },
+    youtube: {
       type: String
     }
   },

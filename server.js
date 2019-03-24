@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 
 // Requiring Routes
 const auth = require("./routes/api/auth");
+const profile = require("./routes/api/profile");
 
 // Instantiating the app
 const app = express();
@@ -21,6 +22,7 @@ passportPrepare();
 
 //redirecting the requests to router files
 app.use("/api/auth", auth);
+app.use("/api/profile", profile);
 
 // switching the port variable for production and devlopment
 let port = process.env.PORT || 12000;

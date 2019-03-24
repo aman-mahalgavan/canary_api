@@ -8,7 +8,7 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}\\Email\\EmailTest.js"
+      "program": "${workspaceFolder}\\server.js"
     }
   ]
 }
