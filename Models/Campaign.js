@@ -3,13 +3,11 @@ const mongoose = require("mongoose");
 const campaignSchema = new mongoose.Schema({
   heading: {
     type: String,
-    required: true,
-    maxlength: 20
+    required: true
   },
   intro: {
     type: String,
-    required: true,
-    maxlength: 40
+    required: true
   },
   about: {
     type: String,
@@ -49,3 +47,7 @@ const campaignSchema = new mongoose.Schema({
     }
   ]
 });
+
+const Campaign = mongoose.model("campaigns", campaignSchema);
+
+module.exports = Campaign;
