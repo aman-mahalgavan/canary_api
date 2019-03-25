@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const User = require("./User");
 
 let profileSchema = new mongoose.Schema({
   user: {
@@ -15,7 +16,8 @@ let profileSchema = new mongoose.Schema({
     required: true
   },
   bio: {
-    type: String
+    type: String,
+    required: true
   },
   social: {
     facebook: {
@@ -56,6 +58,30 @@ let profileSchema = new mongoose.Schema({
     }
   ]
 });
+
+profileSchema.statics.findByAddress = function(address) {
+  let Profile = this;
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await User.findOne({ address });
+      if (!user) {
+        return reject("No User Found with the given Ethereum address");
+      }
+
+      let userProfile = await Profile.findOne({ user: user._id });
+
+      // console.log(user);
+      // console.log(userProfile);
+      if (!userProfile) {
+        return reject("No Profile found");
+      }
+
+      return resolve(userProfile);
+    } catch (err) {
+      return reject(err.message);
+    }
+  });
+};
 
 let Profile = mongoose.model("profiles", profileSchema);
 

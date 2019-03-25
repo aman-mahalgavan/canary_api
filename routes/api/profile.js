@@ -3,6 +3,8 @@ const express = require("express");
 const Profile = require("../../Models/Profile");
 const { upload, bucket } = require("../../configure/image-upload-setup");
 const uploadToGcs = require("../../utils/uploadToGcs");
+const isEmpty = require("../../validation/is-empty");
+const validateProfileInputs = require("../../validation/profile");
 // const uploadImage = require("../../utils/image-upload-middleware");
 const passport = require("passport");
 
@@ -21,7 +23,13 @@ router.post(
   upload.single("profileImage"),
 
   async (req, res) => {
-    let errors = {};
+    const { errors, isValid } = validateProfileInputs(req.body);
+
+    // Check Validation
+    if (!isValid) {
+      // Return any errors with 400 status
+      return res.status(400).json({ errors });
+    }
     try {
       // Checking if the profile already exist
       let userProfile = await Profile.findOne({ user: req.user._id });
@@ -77,13 +85,28 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   upload.single("profileImage"),
   async (req, res) => {
-    let errors = {};
+    const { errors, isValid } = validateProfileInputs(req.body);
+
+    // Check Validation
+    if (!isValid) {
+      // Return any errors with 400 status
+      return res.status(400).json({ errors });
+    }
     try {
+      // fetching the previous profile
+      let userProfile = await Profile.findOne({ user: req.user._id });
+      console.log(userProfile);
+      console.log(typeof userProfile);
+
       let profileFields = {
         handle: req.body.handle,
         bio: req.body.bio,
-        user: req.user._id
+        user: req.user._id,
+        campaigns: userProfile.campaigns,
+        contribution: userProfile.contribution
       };
+
+      // console.log(profileFields);
 
       // Checking if a profile with similar handle already exist
       let similarProfile = await Profile.findOne({
@@ -100,9 +123,6 @@ router.put(
         return res.status(400).json({ errors });
       }
 
-      // fetching the previous profile
-      let userProfile = await Profile.findOne({ user: req.user._id });
-
       let userAvatar;
 
       // If profileImage is sent , upload the image to gcd else use the previous image
@@ -112,7 +132,19 @@ router.put(
         userAvatar = userProfile.avatar;
       }
       profileFields.avatar = userAvatar;
-      let savedProfile;
+
+      // Adding the Social fields if exits
+      let { social } = userProfile;
+
+      profileFields.social = !isEmpty(social) ? social : {};
+      console.log(profileFields.social);
+      if (req.body.youtube) profileFields.social.youtube = req.body.youtube;
+      if (req.body.twitter) profileFields.social.twitter = req.body.twitter;
+      if (req.body.facebook) profileFields.social.facebook = req.body.facebook;
+      if (req.body.instagram)
+        profileFields.social.instagram = req.body.instagram;
+
+      console.log(profileFields.social);
 
       // Updating the already existing profile
       let updatedProfile = await Profile.findOneAndUpdate(
@@ -124,9 +156,71 @@ router.put(
       return res.json(updatedProfile);
     } catch (err) {
       errors.message = err.message;
-      res.status(400).json(errors);
+      return res.status(400).json(errors);
+    }
+  }
+);
+
+// @route     GET /api/profile/
+// @fnc       Getting the user Profile
+// @access    private
+
+router.get(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let errors = {};
+
+    try {
+      // fetching the logged in user profile
+      let userProfile = await Profile.findOne({ user: req.user._id });
+      if (!userProfile) {
+        errors.message = "Profile has not been created yet";
+        return res.status(400).json({ errors });
+      }
+      return res.json(userProfile);
+    } catch (err) {
+      errors.message = err.message;
+      return res.status(400).json(errors);
     }
   }
 );
 
 module.exports = router;
+
+// @route     GET /api/profile/:address
+// @fnc       Getting the user Profile through ethereum address
+// @access    public
+
+router.get("/:address", async (req, res) => {
+  let errors = {};
+  try {
+    let userProfile = await Profile.findByAddress(req.params.address);
+
+    return res.json(userProfile);
+  } catch (err) {
+    console.log(err);
+    errors.message = err;
+    return res.status(400).json({ errors });
+  }
+});
+
+// @route     GET /api/profile/:id
+// @fnc       Getting the user Profile through user Id
+// @access    public
+
+router.get("/:id", async (req, res) => {
+  let errors = {};
+  try {
+    let userProfile = await Profile.findOne({ user: req.params.id });
+    if (!userProfile) {
+      errors.message = "No Profile with the given user Id found";
+      return res.status(400).json({ errors });
+    }
+    return res.json(userProfile);
+  } catch (err) {
+    console.log(err);
+    errors.message = err;
+    return res.status(400).json({ errors });
+  }
+});
