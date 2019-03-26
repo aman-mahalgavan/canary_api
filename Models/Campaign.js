@@ -31,6 +31,10 @@ const campaignSchema = new mongoose.Schema({
         type: String,
         required: true
       },
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users"
+      },
       avatar: {
         type: String,
         required: true
@@ -43,7 +47,11 @@ const campaignSchema = new mongoose.Schema({
   ],
   updates: [
     {
-      updateId: { type: mongoose.Schema.Types.ObjectId, required: true }
+      updateId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "updates",
+        required: true
+      }
     }
   ]
 });

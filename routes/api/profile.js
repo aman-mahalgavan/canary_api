@@ -59,6 +59,10 @@ router.post(
       // Uploading the profile image to google cloud services
       profileFields.avatar = await uploadToGcs(req, bucket);
 
+      // Adding the Social fields
+
+      profileFields.social = {};
+
       if (req.body.youtube) profileFields.social.youtube = req.body.youtube;
       if (req.body.twitter) profileFields.social.twitter = req.body.twitter;
       if (req.body.facebook) profileFields.social.facebook = req.body.facebook;
@@ -95,8 +99,6 @@ router.put(
     try {
       // fetching the previous profile
       let userProfile = await Profile.findOne({ user: req.user._id });
-      console.log(userProfile);
-      console.log(typeof userProfile);
 
       let profileFields = {
         handle: req.body.handle,
@@ -137,14 +139,12 @@ router.put(
       let { social } = userProfile;
 
       profileFields.social = !isEmpty(social) ? social : {};
-      console.log(profileFields.social);
+
       if (req.body.youtube) profileFields.social.youtube = req.body.youtube;
       if (req.body.twitter) profileFields.social.twitter = req.body.twitter;
       if (req.body.facebook) profileFields.social.facebook = req.body.facebook;
       if (req.body.instagram)
         profileFields.social.instagram = req.body.instagram;
-
-      console.log(profileFields.social);
 
       // Updating the already existing profile
       let updatedProfile = await Profile.findOneAndUpdate(
@@ -199,7 +199,6 @@ router.get("/:address", async (req, res) => {
 
     return res.json(userProfile);
   } catch (err) {
-    console.log(err);
     errors.message = err;
     return res.status(400).json({ errors });
   }
@@ -219,7 +218,6 @@ router.get("/:id", async (req, res) => {
     }
     return res.json(userProfile);
   } catch (err) {
-    console.log(err);
     errors.message = err;
     return res.status(400).json({ errors });
   }

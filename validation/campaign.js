@@ -16,8 +16,8 @@ module.exports = function validateCampaignInputs(data, file) {
       "An Image needs to be uploaded while creating a Campaign";
   }
 
-  if (!Validator.isLength(data.heading, { min: 10, max: 20 })) {
-    errors.heading = "Heading needs to between 10 and 20 characters";
+  if (!Validator.isLength(data.heading, { min: 10, max: 40 })) {
+    errors.heading = "Heading needs to between 10 and 40 characters";
   }
 
   if (!Validator.isLength(data.intro, { min: 10, max: 100 })) {

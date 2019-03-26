@@ -41,6 +41,7 @@ let profileSchema = new mongoose.Schema({
       },
       campaignId: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: "campaigns",
         required: true
       }
     }
@@ -53,6 +54,7 @@ let profileSchema = new mongoose.Schema({
       },
       campaignId: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: "campaigns",
         required: true
       }
     }

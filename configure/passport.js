@@ -13,8 +13,8 @@ module.exports = () => {
       User.findById(payload.id)
         .then(user => {
           if (user) {
-            let { _id, email, name } = user;
-            return done(null, { _id, email, name });
+            let { _id, email, name, address } = user;
+            return done(null, { _id, email, name, address });
           }
           return done(null, false);
         })

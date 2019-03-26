@@ -3,11 +3,13 @@ const express = require("express");
 const Campaign = require("../../Models/Campaign");
 const User = require("../../Models/User");
 const Profile = require("../../Models/Profile");
+const Update = require("../../Models/Updates");
 const { upload, bucket } = require("../../configure/image-upload-setup");
 const uploadToGcs = require("../../utils/uploadToGcs");
 const isEmpty = require("../../validation/is-empty");
 const validateCampaignInputs = require("../../validation/campaign");
 const passport = require("passport");
+const { searchElementInArray } = require("../../utils/arrayUtils");
 
 // Creating a router instance
 
@@ -56,9 +58,17 @@ router.post(
       };
       campaignFields.headerImage = await uploadToGcs(req, bucket);
 
-      // Creating and Saving the campaign to the mongodb database
+      // Creating and Saving the campaign to the Campaign Model
       let newCampaign = new Campaign(campaignFields);
       let savedCampaign = await newCampaign.save();
+
+      // Saving the campaign details in Profile Model
+      let campaignObject = {
+        campaignAddress: savedCampaign.campaignAddress,
+        campaignId: savedCampaign._id
+      };
+      userProfile.campaigns.push(campaignObject);
+      await userProfile.save();
       return res.json(savedCampaign);
     } catch (err) {
       errors.message = err.message;
@@ -101,7 +111,162 @@ router.get("/:address", async (req, res) => {
       errors.message = "No campaign found with the given address";
       res.status(400).json({ errors });
     }
-    return res.json(campign);
+    return res.json(campaign);
+  } catch (err) {
+    errors.message = err.message;
+    return res.status(400).json({ errors });
+  }
+});
+
+// @route     POST /api/campaign/contribute
+// @fnc       Contributimg to  a  Campaign
+// @access    private
+
+router.post(
+  "/contribute",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let errors = {};
+    try {
+      let campaign = await Campaign.findOne({
+        campaignAddress: req.body.address
+      });
+
+      // Checking if the required campaign and userProfile exist
+      if (!campaign) {
+        errors.message = "No Campaign with this address found";
+        return res.status(400).json({ errors });
+      }
+      let userProfile = await Profile.findOne({ user: req.user._id });
+      if (!userProfile) {
+        errors.message = "User has not created his profile";
+        return res.status(400).json({ errors });
+      }
+
+      // Creating a contribution object based on Profile model
+      let contributionObject = {
+        campaignAddress: campaign.campaignAddress,
+        campaignId: campaign._id
+      };
+
+      if (
+        !searchElementInArray(
+          userProfile.contributions,
+          contributionObject.campaignAddress
+        )
+      ) {
+        // Adding and updating the contribution section of Profile model
+        userProfile.contributions.push(contributionObject);
+        let savedProfile = await userProfile.save();
+        return res.json(savedProfile);
+      }
+      return res.json(userProfile);
+    } catch (err) {
+      errors.message = err.message;
+      return res.status(400).json({ errors });
+    }
+  }
+);
+
+// @route     POST /api/campaign/comment
+// @fnc       Commenting on a campaign
+// @access    private
+
+router.post(
+  "/comment",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let errors = {};
+    try {
+      let campaign = await Campaign.findOne({
+        campaignAddress: req.body.address
+      });
+
+      // Checking if the required campaign and userProfile exist
+      if (!campaign) {
+        errors.message = "No Campaign with this address found";
+        return res.status(400).json({ errors });
+      }
+      let userProfile = await Profile.findOne({ user: req.user._id });
+      if (!userProfile) {
+        errors.message = "User has not created his profile";
+        return res.status(400).json({ errors });
+      }
+      let commentFields = {
+        userName: req.user.name,
+        user: req.user._id,
+        avatar: userProfile.avatar,
+        commentBody: req.body.comment
+      };
+
+      campaign.comments.push(commentFields);
+      let updatedCampaign = await campaign.save();
+      return res.json(updatedCampaign);
+    } catch (err) {
+      errors.message = err.message;
+      return res.status(400).json({ errors });
+    }
+  }
+);
+
+// @route     POST /api/campaign/update
+// @fnc       Add an Update
+// @access    private
+
+router.post(
+  "/update",
+  passport.authenticate("jwt", { session: false }),
+  upload.single("updateImage"),
+  async (req, res) => {
+    let errors = {};
+    try {
+      let campaign = await Campaign.findOne({
+        campaignAddress: req.body.address
+      });
+      if (!campaign) {
+        errors.address = "No Campaign found with the provided Campaign address";
+        return res.status(400).json({ errors });
+      }
+
+      if (campaign.creatorAddress !== req.user.address) {
+        errors.address = "Only the creator can add updates to a campaign";
+        return res.status(400).json({ errors });
+      }
+      // Creating updateFields
+      let updateFields = {
+        heading: req.body.heading,
+        details: req.body.details
+      };
+      updateFields.image = await uploadToGcs(req, bucket);
+
+      // creating and saving to the Update collection
+      let newUpdate = new Update(updateFields);
+      let savedUpdate = await newUpdate.save();
+
+      // Updating the respective Campaign collection
+      campaign.updates.push({ updateId: savedUpdate._id });
+      let updatedCampaign = await campaign.save();
+      return res.json(updatedCampaign);
+    } catch (err) {
+      errors.message = err.message;
+      return res.status(400).json({ errors });
+    }
+  }
+);
+
+// @route     GET /api/campaign/update/:id
+// @fnc       Fetch a Single update through object id
+// @access    public
+
+router.get("/update/:id", async (req, res) => {
+  let errors = {};
+  try {
+    let update = await Update.findById(req.params.id);
+    if (!update) {
+      errors.message = "No update with the given id found";
+      return res.status(400).json({ errors });
+    }
+    return res.json(update);
   } catch (err) {
     errors.message = err.message;
     return res.status(400).json({ errors });
