@@ -25,6 +25,11 @@ const campaignSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  creatorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+    required: true
+  },
   comments: [
     {
       userName: {
@@ -50,6 +55,15 @@ const campaignSchema = new mongoose.Schema({
       updateId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "updates",
+        required: true
+      }
+    }
+  ],
+  faq: [
+    {
+      faqId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "faq",
         required: true
       }
     }

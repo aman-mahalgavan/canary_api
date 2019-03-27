@@ -4,6 +4,7 @@ const Campaign = require("../../Models/Campaign");
 const User = require("../../Models/User");
 const Profile = require("../../Models/Profile");
 const Update = require("../../Models/Updates");
+const Faq = require("../../Models/Faq");
 const { upload, bucket } = require("../../configure/image-upload-setup");
 const uploadToGcs = require("../../utils/uploadToGcs");
 const isEmpty = require("../../validation/is-empty");
@@ -272,5 +273,78 @@ router.get("/update/:id", async (req, res) => {
     return res.status(400).json({ errors });
   }
 });
+
+// @route     POST /api/campaign/question
+// @fnc       Ask a Question to the campaign creator
+// @access    private
+
+router.post(
+  "/question",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let errors = {};
+    try {
+      let campaign = await Campaign.findOne({
+        campaignAddress: req.body.address
+      });
+      if (!campaign) {
+        errors.message = "No campaign with the given address found";
+        return res.status(400).json({ errors });
+      }
+      let newFaq = new Faq({
+        question: req.body.question
+      });
+      let savedFaq = await newFaq.save();
+      campaign.faq.push({ faqId: savedFaq._id });
+      let updatedCampaign = await campaign.save();
+      return res.json(updatedCampaign);
+    } catch (err) {
+      errors.message = err.message;
+      return res.status(400).json({ errors });
+    }
+  }
+);
+
+// @route     POST /api/campaign/amswer
+// @fnc       Answering a Question(Only campaign creator can answer)
+// @access    private
+
+router.post(
+  "/answer",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let errors = {};
+    try {
+      let campaign = await Campaign.findOne({
+        campaignAddress: req.body.address
+      });
+
+      // Some validations before updating the answer
+      if (!campaign) {
+        errors.message = "No campaign with the given address found";
+        return res.status(400).json({ errors });
+      }
+      if (campaign.creatorAddress !== req.user.address) {
+        errors.message = "Only the campaign creator can answer the Question";
+        return res.status(400).json({ errors });
+      }
+      let faq = await Faq.findById(req.body.id);
+      if (!faq) {
+        errors.message = "No Faq found with the given id";
+        return res.status(400).json({ errors });
+      }
+
+      // Updating the answer
+      faq.answer = req.body.answer;
+      let savedFaq = await faq.save();
+
+      // Sending the campaign
+      return res.json(campaign);
+    } catch (err) {
+      errors.message = err.message;
+      return res.status(400).json({ errors });
+    }
+  }
+);
 
 module.exports = router;
