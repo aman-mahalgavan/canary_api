@@ -16,6 +16,9 @@ let userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  avatar:{
+    type:String
+  },
   Date: {
     type: Date,
     default: Date.now
@@ -26,6 +29,10 @@ let userSchema = new mongoose.Schema({
   },
   address: {
     type: String
+  },
+  hasProfile: {
+    type: Boolean,
+    default: false
   }
 });
 

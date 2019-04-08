@@ -70,6 +70,7 @@ router.post(
       };
       userProfile.campaigns.push(campaignObject);
       await userProfile.save();
+      
       return res.json(savedCampaign);
     } catch (err) {
       errors.message = err.message;

@@ -19,6 +19,9 @@ module.exports = function validateProfileInput(data) {
     errors.handle = "Profile handle is required";
   }
 
+  if (Validator.isEmpty(data.location)) {
+    errors.location = " location is required";
+  }
   if (Validator.isEmpty(data.bio)) {
     errors.bio = " bio is required";
   }

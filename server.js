@@ -4,6 +4,7 @@ const passport = require("passport");
 const passportPrepare = require("./configure/passport");
 const mongoose = require("./configure/mongoose");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 // Requiring Routes
 const auth = require("./routes/api/auth");
@@ -12,6 +13,9 @@ const campaign = require("./routes/api/campaign");
 
 // Instantiating the app
 const app = express();
+
+// USing Cors middleware
+app.use(cors());
 
 // body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));

@@ -1,6 +1,7 @@
 // requirng modules
 const express = require("express");
 const Profile = require("../../Models/Profile");
+const User  = require("../../Models/User");
 const { upload, bucket } = require("../../configure/image-upload-setup");
 const uploadToGcs = require("../../utils/uploadToGcs");
 const isEmpty = require("../../validation/is-empty");
@@ -20,7 +21,7 @@ const router = express.Router();
 router.post(
   "/create",
   passport.authenticate("jwt", { session: false }),
-  upload.single("profileImage"),
+  upload.single("avatar"),
 
   async (req, res) => {
     const { errors, isValid } = validateProfileInputs(req.body);
@@ -42,6 +43,7 @@ router.post(
 
       let profileFields = {
         handle: req.body.handle,
+        location:req.body.location,
         bio: req.body.bio,
         user: req.user._id
       };
@@ -72,6 +74,7 @@ router.post(
       // Creating a new profile and then saving it
       let newProfile = new Profile(profileFields);
       savedProfile = await newProfile.save();
+      await User.findOneAndUpdate({ _id: req.user._id },{hasProfile:true,avatar:savedProfile.avatar});
       return res.json(savedProfile);
     } catch (err) {
       errors.message = err.message;

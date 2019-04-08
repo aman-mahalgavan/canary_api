@@ -76,7 +76,7 @@ router.post("/login", async (req, res) => {
       if (isMatch) {
         if (!user.isVerified) {
           errors.verified = `Your email ${user.email} is not yet verified`;
-          return res.status(401).send({ errors });
+          return res.status(400).send({ errors });
         }
         let token = await user.createJWT();
         return res.json({
@@ -96,6 +96,33 @@ router.post("/login", async (req, res) => {
     return res.status(400).json({ errors });
   }
 });
+
+//<--------------------------------------Logic for fetching user----------------------------------->
+
+// @route     GET /api/auth/user
+// @fnc       getting the logged in user
+// @access    private
+
+router.get(
+  "/user",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let errors = {};
+    try {
+      let user = await User.findById(req.user._id);
+      res.json({
+        name:user.name,
+        email:user.email,
+        address:user.address,
+        hasProfile:user.hasProfile,
+        id:user._id
+      });
+    } catch (err) {
+      errors.message = err.message;
+      res.status(400).json({ errors });
+    }
+  }
+);
 
 //<--------------------------------------Logic for email confirmation----------------------------------->
 
