@@ -43,7 +43,7 @@ router.post(
         return res.status(400).json({ errors });
       }
       let userProfile = await Profile.findOne({ user: user._id });
-      if (!userProfile) {
+      if (isEmpty(userProfile)) {
         errors.message = "No profile created for this user";
         return res.status(400).json({ errors });
       }
@@ -88,10 +88,13 @@ router.get("/", async (req, res) => {
   let errors = {};
   try {
     let campaigns = await Campaign.find().sort("-createdAT");
-    if (!campaigns) {
+    
+    if (isEmpty(campaigns)) {
+      console.log("Inside");
       errors.message = "No Campaigns Found";
-      res.status(400).json({ errors });
+      return res.status(400).json({ errors });
     }
+    
     return res.json(campaigns);
   } catch (err) {
     errors.message = err.message;
@@ -110,7 +113,7 @@ router.get("/:address", async (req, res) => {
     let campaign = await Campaign.findOne({
       campaignAddress: req.params.address
     });
-    if (!campaign) {
+    if (isEmpty(campaign)) {
       errors.message = "No campaign found with the given address";
       res.status(400).json({ errors });
     }
@@ -136,12 +139,12 @@ router.post(
       });
 
       // Checking if the required campaign and userProfile exist
-      if (!campaign) {
+      if (isEmpty(campaign)) {
         errors.message = "No Campaign with this address found";
         return res.status(400).json({ errors });
       }
       let userProfile = await Profile.findOne({ user: req.user._id });
-      if (!userProfile) {
+      if (isEmpty(userProfile)) {
         errors.message = "User has not created his profile";
         return res.status(400).json({ errors });
       }
