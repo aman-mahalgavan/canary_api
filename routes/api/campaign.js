@@ -55,7 +55,8 @@ router.post(
         intro: req.body.intro,
         about: req.body.about,
         campaignAddress: req.body.campaignAddress,
-        creatorAddress: user.address
+        creatorAddress: user.address,
+        creatorId:user._id
       };
       campaignFields.headerImage = await uploadToGcs(req, bucket);
 

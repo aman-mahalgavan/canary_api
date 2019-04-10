@@ -115,7 +115,8 @@ router.get(
         email:user.email,
         address:user.address,
         hasProfile:user.hasProfile,
-        id:user._id
+        id:user._id,
+        avatar:user.avatar
       });
     } catch (err) {
       errors.message = err.message;
@@ -279,5 +280,33 @@ router.post("/reset", async (req, res) => {
 
   return res.status(200).json({ msg: "The password has been resetted" });
 });
+
+
+//<--------------------------------------Logic for Resetting the Password---------------------------------->
+
+// @route     POST /api/auth/updateAddress
+// @fnc       Adding the Ethereum address to the user Account
+// @access    Private
+
+router.post("/updateAddress",passport.authenticate("jwt", { session: false }),async (req,res)=>{
+  let errors = {};
+  let {address} = req.body;
+try{
+    let user = await User.findOne(req.user._id);
+  if(!user){
+      errors.message = "User Not Found";
+    return res.status(400).json({ errors });
+  }
+  user.address = address;
+  
+  let updatedUser = await user.save();
+  return res.json(updatedUser);
+}catch(err){
+  errors.message = err.message;
+    return res.status(400).json({ errors });
+}
+})
+
+
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const campaignSchema = new mongoose.Schema({
-  heading: {
+heading: {
     type: String,
     required: true
   },
