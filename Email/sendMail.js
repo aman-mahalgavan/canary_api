@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const keys = require("../credentials");
+console.log(keys);
 
 let frontendUrl = "localhost:3000"
 
@@ -38,7 +39,7 @@ module.exports = async (token, host, receiver, usage) => {
     subject: "Email confirmation", // Subject line
     text: "Hello world?", // plain text body
     html: output, // html body
-    auth:{
+    auth: {
       user: keys.user,
       refreshToken: keys.refreshToken
     }

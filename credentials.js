@@ -6,5 +6,5 @@ module.exports = {
   accessToken:
     process.env.accessToken,
   refreshToken: process.env.refreshToken,
-  user: "ukogdna6560@gmail.com"
+  user: process.env.user
 };
