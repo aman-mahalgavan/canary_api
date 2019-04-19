@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { tokenSECRET } = require("../configure/keys");
+const tokenSECRET = process.env.tokenSECRET;
 
 let userSchema = new mongoose.Schema({
   name: {
@@ -16,8 +16,8 @@ let userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  avatar:{
-    type:String
+  avatar: {
+    type: String
   },
   Date: {
     type: Date,
@@ -37,7 +37,7 @@ let userSchema = new mongoose.Schema({
 });
 
 // Method for creating hashPassword
-userSchema.methods.hashPassword = function() {
+userSchema.methods.hashPassword = function () {
   let user = this;
   return new Promise((resolve, reject) => {
     bcrypt.genSalt(10, (err, salt) => {
@@ -54,7 +54,7 @@ userSchema.methods.hashPassword = function() {
 };
 
 // Method for creating JWT token for a particular user
-userSchema.methods.createJWT = function() {
+userSchema.methods.createJWT = function () {
   const user = this;
   const data = {
     id: user.id,

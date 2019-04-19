@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
-const keys = require("./keys");
+
 
 
 
 mongoose.Promise = global.Promise;
 
 mongoose.connect(
-  keys.mongoURI,
+  process.env.mongoURI,
   { useNewUrlParser: true, useFindAndModify: false, useCreateIndex: true },
   (err, db) => {
     if (!err) {
