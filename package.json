@@ -4,7 +4,7 @@
   "description": "Node backend for the canary fundraising project",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "node server.js"
   },
   "author": "Ankit Brahmbhatt",
   "license": "ISC",
