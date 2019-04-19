@@ -7,7 +7,7 @@ const path = require("path");
 // Instantiate a storage client
 const googleCloudStorage = new Storage({
   projectId: "canary_234512",
-  keyFilename: "canary.json"
+  keyFilename: process.env.GCS_CREDENTIAL
 });
 
 // Multer is required to process file uploads and make them available via
@@ -36,7 +36,7 @@ const bucket = googleCloudStorage.bucket("canary_storage");
 const upload = multer({
   storage: memoryStorage(),
   limits: { fileSize: 2000000 },
-  fileFilter: function(req, file, cb) {
+  fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   }
 });
