@@ -1,10 +1,17 @@
-module.exports = {
-  sendGridApiKey:
-    "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",
-  googleClientId:
-    process.env.googleClientId,
-  accessToken:
-    process.env.accessToken,
-  refreshToken: process.env.refreshToken,
-  user: process.env.user
-};
+
+const keys_prod = require("./credentials_prod");
+
+
+if (process.env.NODE_ENV === "production") {
+  module.exports = keys_prod
+}
+else {
+  const keys_dev = require("./credentials_dev");
+  module.exports = keys_dev
+}
+
+
+
+
+
+
