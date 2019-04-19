@@ -10,9 +10,11 @@ module.exports = async (token, host, receiver, usage) => {
     service: "gmail",
     auth: {
       type: "OAuth2",
+      user: keys.user,
       clientId: keys.googleClientId,
-      clientSecret: keys.googleClientSecret
-
+      clientSecret: keys.googleClientSecret,
+      refreshToken: keys.refreshToken,
+      accessToken: keys.accessToken
     },
     tls: { rejectUnauthorized: false }
   });
@@ -38,11 +40,7 @@ module.exports = async (token, host, receiver, usage) => {
     to: receiver, // list of receivers
     subject: "Email confirmation", // Subject line
     text: "Hello world?", // plain text body
-    html: output, // html body
-    auth: {
-      user: keys.user,
-      refreshToken: keys.refreshToken
-    }
+    html: output
   };
   // send mail with defined transport object
   transporter.sendMail(mailOptions, (error, info) => {

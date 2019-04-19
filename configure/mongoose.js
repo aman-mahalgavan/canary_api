@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const keys = require("./keys");
 
 
 
@@ -6,7 +7,7 @@ const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 
 mongoose.connect(
-  process.env.mongoURI,
+  keys.mongoURI,
   { useNewUrlParser: true, useFindAndModify: false, useCreateIndex: true },
   (err, db) => {
     if (!err) {

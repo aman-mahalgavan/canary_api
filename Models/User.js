@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const tokenSECRET = process.env.tokenSECRET;
+const tokenSECRET = require("../configure/keys").tokenSECRET;
 
 let userSchema = new mongoose.Schema({
   name: {

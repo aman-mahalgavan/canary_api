@@ -56,7 +56,7 @@ router.post(
         about: req.body.about,
         campaignAddress: req.body.campaignAddress,
         creatorAddress: user.address,
-        creatorId:user._id
+        creatorId: user._id
       };
       campaignFields.headerImage = await uploadToGcs(req, bucket);
 
@@ -71,7 +71,7 @@ router.post(
       };
       userProfile.campaigns.push(campaignObject);
       await userProfile.save();
-      
+
       return res.json(savedCampaign);
     } catch (err) {
       errors.message = err.message;
@@ -87,14 +87,14 @@ router.post(
 router.get("/", async (req, res) => {
   let errors = {};
   try {
-    let campaigns = await Campaign.find().sort("-_id");
-    
+    let campaigns = await Campaign.find().populate("creatorId", "name avatar").sort("-_id");
+
     if (isEmpty(campaigns)) {
-      
+
       errors.message = "No Campaigns Found";
       return res.status(400).json({ errors });
     }
-    
+
     return res.json(campaigns);
   } catch (err) {
     errors.message = err.message;
@@ -112,10 +112,10 @@ router.get("/:address", async (req, res) => {
   try {
     let campaign = await Campaign.findOne({
       campaignAddress: req.params.address
-    }).populate("creatorId","name avatar")
-      .populate("updates.updateId",["heading" ,"details","date"])
+    }).populate("creatorId", "name avatar")
+      .populate("updates.updateId", ["heading", "details", "date"])
       .populate("faq.faqId")
-    ;
+      ;
     if (isEmpty(campaign)) {
       errors.message = "No campaign found with the given address";
       res.status(400).json({ errors });
