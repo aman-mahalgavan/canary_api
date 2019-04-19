@@ -87,10 +87,10 @@ router.post(
 router.get("/", async (req, res) => {
   let errors = {};
   try {
-    let campaigns = await Campaign.find().sort("-createdAT");
+    let campaigns = await Campaign.find().sort("-_id");
     
     if (isEmpty(campaigns)) {
-      console.log("Inside");
+      
       errors.message = "No Campaigns Found";
       return res.status(400).json({ errors });
     }
@@ -112,7 +112,10 @@ router.get("/:address", async (req, res) => {
   try {
     let campaign = await Campaign.findOne({
       campaignAddress: req.params.address
-    });
+    }).populate("creatorId","name avatar")
+      .populate("updates.updateId",["heading" ,"details","date"])
+      .populate("faq.faqId")
+    ;
     if (isEmpty(campaign)) {
       errors.message = "No campaign found with the given address";
       res.status(400).json({ errors });
@@ -189,12 +192,12 @@ router.post(
       });
 
       // Checking if the required campaign and userProfile exist
-      if (!campaign) {
+      if (isEmpty(campaign)) {
         errors.message = "No Campaign with this address found";
         return res.status(400).json({ errors });
       }
       let userProfile = await Profile.findOne({ user: req.user._id });
-      if (!userProfile) {
+      if (isEmpty(userProfile)) {
         errors.message = "User has not created his profile";
         return res.status(400).json({ errors });
       }
@@ -229,7 +232,7 @@ router.post(
       let campaign = await Campaign.findOne({
         campaignAddress: req.body.address
       });
-      if (!campaign) {
+      if (isEmpty(campaign)) {
         errors.address = "No Campaign found with the provided Campaign address";
         return res.status(400).json({ errors });
       }
@@ -268,7 +271,7 @@ router.get("/update/:id", async (req, res) => {
   let errors = {};
   try {
     let update = await Update.findById(req.params.id);
-    if (!update) {
+    if (isEmpty(update)) {
       errors.message = "No update with the given id found";
       return res.status(400).json({ errors });
     }
@@ -292,7 +295,7 @@ router.post(
       let campaign = await Campaign.findOne({
         campaignAddress: req.body.address
       });
-      if (!campaign) {
+      if (isEmpty(campaign)) {
         errors.message = "No campaign with the given address found";
         return res.status(400).json({ errors });
       }
@@ -325,7 +328,7 @@ router.post(
       });
 
       // Some validations before updating the answer
-      if (!campaign) {
+      if (isEmpty(campaign)) {
         errors.message = "No campaign with the given address found";
         return res.status(400).json({ errors });
       }
@@ -334,7 +337,7 @@ router.post(
         return res.status(400).json({ errors });
       }
       let faq = await Faq.findById(req.body.id);
-      if (!faq) {
+      if (isEmpty(faq)) {
         errors.message = "No Faq found with the given id";
         return res.status(400).json({ errors });
       }

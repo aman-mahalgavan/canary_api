@@ -26,6 +26,7 @@ module.exports = function validateProfileInput(data) {
     errors.bio = " bio is required";
   }
 
+  
   if (!isEmpty(data.youtube)) {
     if (!Validator.isURL(data.youtube)) {
       errors.youtube = "Not a valid URL";

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const campaignSchema = new mongoose.Schema({
-heading: {
+  heading: {
     type: String,
     required: true
   },
@@ -29,6 +29,10 @@ heading: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
     required: true
+  },
+  date: {
+    type: Date,
+    default: Date.now
   },
   comments: [
     {
@@ -63,7 +67,7 @@ heading: {
     {
       faqId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "faq",
+        ref: "faqs",
         required: true
       }
     }

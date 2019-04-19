@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const sendMail = require("../../Email/sendMail");
 const validateRegisterInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
+const isEmpty = require("../../validation/is-empty");
 
 // Creating a Router object
 const router = express.Router();
@@ -26,7 +27,7 @@ router.post("/register", async (req, res) => {
   }
   try {
     let user = await User.findOne({ email });
-    if (user) {
+    if (!isEmpty(user)) {
       errors.email = "Email already exists";
       return res.status(400).json({ error });
     } else {
@@ -70,7 +71,7 @@ router.post("/login", async (req, res) => {
   }
   try {
     user = await User.findOne({ email });
-    if (user) {
+    if (!isEmpty(user)) {
       let isMatch = await bcrypt.compare(password, user.password);
 
       if (isMatch) {
@@ -148,7 +149,7 @@ router.get("/confirmation/:token", async (req, res) => {
     let targetUser = await User.findOne({ _id: targetToken.userId });
 
     // Notifying the client if the related user doesnt exist
-    if (!targetUser) {
+    if (isEmpty(targetUser)) {
       errors.userNotFound = `User related to this token doesnt exist`;
       return res.status(400).json({ errors });
     }
@@ -176,7 +177,7 @@ router.post("/resend", async (req, res) => {
     let user = await User.findOne({ email });
 
     // If no such user exits, notify the client
-    if (!user) {
+    if (isEmpty(user)) {
       errors.email = "No user found related to this email";
       return res.status(400).json({ error });
     }
@@ -223,7 +224,7 @@ router.post("/forgot", async (req, res) => {
     // Searching for the user through email
 
     let user = await User.findOne({ email });
-    if (!user) {
+    if (isEmpty(user)) {
       errors.email = `No user found with email address ${email}`;
       return res.status(400).json({ errors });
     }
@@ -259,9 +260,15 @@ router.post("/reset", async (req, res) => {
   // Finding the details of the token came along request parameters
   let targetToken = await Token.findOne({ token });
 
+
+  if(!password || password !== confirmPassword){
+    errors.message = `Make Sure that Both fields are not empty and equal`;
+    return res.status(400).json({ errors });
+  }
+
   // Notifying the client if no such token exist
   if (!targetToken) {
-    errors.tokenExpired = `The token provided is expired. Please create and resend a new token`;
+    errors.message = `The token provided is expired. Please create and resend a new token`;
     return res.status(400).json({ errors });
   }
 
@@ -270,7 +277,7 @@ router.post("/reset", async (req, res) => {
 
   // Notifying the client if the related user doesnt exist
   if (!targetUser) {
-    errors.userNotFound = `User related to this token doesnt exist`;
+    errors.message = `User related to this token doesnt exist`;
     return res.status(400).json({ errors });
   }
 
@@ -278,11 +285,11 @@ router.post("/reset", async (req, res) => {
   let hashedUser = await targetUser.hashPassword();
   let savedUser = await hashedUser.save();
 
-  return res.status(200).json({ msg: "The password has been resetted" });
+  return res.status(200).json({ message: "The password has been changed" });
 });
 
 
-//<--------------------------------------Logic for Resetting the Password---------------------------------->
+//<------------------------Logic for connecting an Ethereum address to the account---------------------------------->
 
 // @route     POST /api/auth/updateAddress
 // @fnc       Adding the Ethereum address to the user Account

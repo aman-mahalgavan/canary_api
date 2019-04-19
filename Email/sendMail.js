@@ -21,7 +21,7 @@ module.exports = async (token, host, receiver, usage) => {
     output = `
     <h2>Please click on the button below to confirm your email</h2>
      
-       <a href="http://${frontendUrl}/auth/confirmation/${token}">Confirm</a>
+       <a href="http://${frontendUrl}/confirmation/${token}">Confirm</a>
       `;
   } else {
     output = `

@@ -1,8 +1,12 @@
 const mongoose = require("mongoose");
+const keys = require("./keys");
+
+
+
 mongoose.Promise = global.Promise;
 
 mongoose.connect(
-  "mongodb://localhost:27017/canary",
+  keys.mongoURI,
   { useNewUrlParser: true, useFindAndModify: false, useCreateIndex: true },
   (err, db) => {
     if (!err) {

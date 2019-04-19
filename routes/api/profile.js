@@ -107,6 +107,7 @@ router.put(
         handle: req.body.handle,
         bio: req.body.bio,
         user: req.user._id,
+        location:req.body.location,
         campaigns: userProfile.campaigns,
         contribution: userProfile.contribution
       };
@@ -176,8 +177,10 @@ router.get(
 
     try {
       // fetching the logged in user profile
-      let userProfile = await Profile.findOne({ user: req.user._id });
-      if (!userProfile) {
+      let userProfile = await Profile.findOne({ user: req.user._id })
+      .populate("campaigns.campaignId",["heading","headerImage"])
+      .populate("contributions.campaignId",["heading","headerImage"]);;
+      if (isEmpty(userProfile)) {
         errors.message = "Profile has not been created yet";
         return res.status(400).json({ errors });
       }
@@ -198,7 +201,8 @@ module.exports = router;
 router.get("/:address", async (req, res) => {
   let errors = {};
   try {
-    let userProfile = await Profile.findByAddress(req.params.address);
+    let userProfile = await Profile.findByAddress(req.params.address)
+    ;
 
     return res.json(userProfile);
   } catch (err) {
@@ -215,7 +219,7 @@ router.get("/:id", async (req, res) => {
   let errors = {};
   try {
     let userProfile = await Profile.findOne({ user: req.params.id });
-    if (!userProfile) {
+    if (isEmpty(userProfile)) {
       errors.message = "No Profile with the given user Id found";
       return res.status(400).json({ errors });
     }
