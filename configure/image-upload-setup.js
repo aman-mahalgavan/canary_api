@@ -6,8 +6,8 @@ const path = require("path");
 
 // Instantiate a storage client
 const googleCloudStorage = new Storage({
-  projectId: "canary_234512",
-  keyFilename: "canary.json"
+  projectId: "canary-234512",
+  keyFilename: "Canary-b769603c59ad.json"
 });
 
 // Multer is required to process file uploads and make them available via
