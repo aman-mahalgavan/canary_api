@@ -1,4 +1,4 @@
 node_modules/
-canary.json/
+canary.json
 credentials_dev.js
 configure/keys_dev.js
